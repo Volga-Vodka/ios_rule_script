@@ -1,0 +1,15 @@
+HOST,api.biliapi.com,港台番剧
+HOST,api.biliapi.net,港台番剧
+HOST,api.bilibili.com,港台番剧
+HOST,app.biliapi.com,港台番剧
+HOST,app.biliapi.net,港台番剧
+HOST,app.bilibili.com,港台番剧
+HOST,grpc.biliapi.net,港台番剧
+HOST,m.bilibili.com,港台番剧
+HOST,www.bilibili.com,港台番剧
+HOST-KEYWORD,cn-hk-eq-bcache-,港台番剧
+HOST,cache.video.iqiyi.com,港台番剧
+IP-CIDR,116.211.202.206/32,港台番剧
+IP-CIDR,116.211.202.216/32,港台番剧
+HOST-SUFFIX,api.mgtv.com,港台番剧
+HOST,mobileso.bz.mgtv.com,港台番剧
