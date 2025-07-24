@@ -1,59 +1,44 @@
-/*
- * @name  Bilibili 全量 CDN 替换（调试版）
- * @note  替换 dash.video/audio + durl 中的所有 CDN 域名，并打印替换统计
- */
-console.log("🚀 正式替换脚本已执行，当前 URL：", $request.url);
+// 用于打印 JSON 结构和示例链接的调试脚本
 
 let body = $response.body;
 if (!body) return $done({});
 
+// 解析 JSON
+let json;
 try {
-  let json = JSON.parse(body);
-  const host = "upos-sz-estgoss.bilivideo.com";
-
-  // 记录样例
-  let firstVideoOld = null, firstVideoNew = null;
-  let firstAudioOld = null, firstAudioNew = null;
-
-  // 替换 DASH 视频
-  if (json.data?.dash?.video) {
-    json.data.dash.video.forEach((item, idx) => {
-      if (item.baseUrl) {
-        if (idx === 0) firstVideoOld = item.baseUrl;
-        item.baseUrl = item.baseUrl.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        if (idx === 0) firstVideoNew = item.baseUrl;
-      }
-      if (item.backupUrl) {
-        item.backupUrl = item.backupUrl.map(u =>
-          u.replace(/https?:\/\/[^\/]+/, `https://${host}`)
-        );
-      }
-    });
-    console.log("🎬 video[0] before:", firstVideoOld);
-    console.log("🎬 video[0]  after:", firstVideoNew);
-  }
-
-  // 替换 DASH 音频
-  if (json.data?.dash?.audio) {
-    json.data.dash.audio.forEach((item, idx) => {
-      if (item.baseUrl) {
-        if (idx === 0) firstAudioOld = item.baseUrl;
-        item.baseUrl = item.baseUrl.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        if (idx === 0) firstAudioNew = item.baseUrl;
-      }
-      if (item.backupUrl) {
-        item.backupUrl = item.backupUrl.map(u =>
-          u.replace(/https?:\/\/[^\/]+/, `https://${host}`)
-        );
-      }
-    });
-    console.log("🎵 audio[0] before:", firstAudioOld);
-    console.log("🎵 audio[0]  after:", firstAudioNew);
-  }
-
-  $done({ body: JSON.stringify(json) });
-
+  json = JSON.parse(body);
 } catch (e) {
-  console.log("❌ 脚本出错：", e);
-  $done({});
+  console.log("❌ JSON 解析失败：", e);
+  return $done({});
 }
+
+// 打印 data 级别的顶级字段
+console.log("📦 data keys:", Object.keys(json.data || {}));
+
+// 如果有 dash，打印 dash 的字段
+if (json.data?.dash) {
+  console.log("📦 dash keys:", Object.keys(json.data.dash));
+
+  // 如果有 video 数组，打印第一个元素的字段名和示例 URL
+  if (Array.isArray(json.data.dash.video) && json.data.dash.video.length > 0) {
+    const v0 = json.data.dash.video[0];
+    console.log("🎬 video[0] keys:", Object.keys(v0));
+    console.log("🎬 video[0] URL:", v0.baseUrl || v0.BaseUrl || v0.url || "（未找到字段）");
+  }
+
+  // 如果有 audio 数组，打印第一个元素的字段名和示例 URL
+  if (Array.isArray(json.data.dash.audio) && json.data.dash.audio.length > 0) {
+    const a0 = json.data.dash.audio[0];
+    console.log("🎵 audio[0] keys:", Object.keys(a0));
+    console.log("🎵 audio[0] URL:", a0.baseUrl || a0.BaseUrl || a0.url || "（未找到字段）");
+  }
+}
+
+// 如果有 durl，打印第一个元素的字段名和示例 URL
+if (Array.isArray(json.data.durl) && json.data.durl.length > 0) {
+  const d0 = json.data.durl[0];
+  console.log("📦 durl[0] keys:", Object.keys(d0));
+  console.log("📦 durl[0] URL:", d0.url || d0.Url || "（未找到字段）");
+}
+
+$done({ body });
