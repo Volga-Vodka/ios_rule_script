@@ -2,6 +2,7 @@
  * @name  Bilibili 全量 CDN 替换（调试版）
  * @note  替换 dash.video/audio + durl 中的所有 CDN 域名，并打印替换统计
  */
+console.log("🚀 正式替换脚本已执行，当前 URL：", $request.url);
 
 let body = $response.body;
 if (!body) return $done({});
