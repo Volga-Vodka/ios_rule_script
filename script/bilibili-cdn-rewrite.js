@@ -4,8 +4,6 @@
  */
 console.log("🚀 正式替换脚本已执行，当前 URL：", $request.url);
 
-/
-
 let body = $response.body;
 if (!body) return $done({});
 
