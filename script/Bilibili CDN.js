@@ -1,10 +1,5 @@
-/*
- Quantumult X Bilibili CDN Modifier Script
-*/
-
-// --- 在这里修改为您想使用的目标 CDN 域名 ---
 const targetCDN = "upos-sz-estgoss.bilivideo.com"; 
-// 例如: "upos-hz-mirror-ali.bilivideo.com" 或其他您测试过可用的B站官方CDN
+
 
 let body = $response.body;
 
@@ -37,13 +32,11 @@ try {
         });
     }
     
-    // ... 此处可能还需要处理 dash 格式等其他情况 ...
+    // 
 
     body = JSON.stringify(obj);
 
 } catch (e) {
-    // 如果解析JSON失败，可能是Protobuf格式，这里暂不处理
-    // 对于大多数网页端和部分App请求，JSON格式仍然常用
     console.log("Bilibili CDN Mod: JSON parsing failed, might be Protobuf. " + e);
 }
 
