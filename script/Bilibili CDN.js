@@ -1,50 +1,29 @@
-const targetCDN = "upos-sz-estgoss.bilivideo.com"; 
-
+/*
+ * @fileoverview Replace Bilibili CDN URLs in playurl response.
+ * @note Ensure MITM is properly configured for api.bilibili.com
+ */
 
 let body = $response.body;
 
 try {
-    // 尝试解析JSON格式的响应体
     let obj = JSON.parse(body);
-    if (obj.durl) {
-        obj.durl.forEach(segment => {
-            if (segment.url) {
-                segment.url = replaceCDN(segment.url, targetCDN);
+
+    if (obj?.data?.durl && Array.isArray(obj.data.durl)) {
+        obj.data.durl.forEach(item => {
+            if (item.url) {
+                // 替换主url
+                item.url = item.url.replace(/upos-hz-mirror.*?\.bilivideo\.com/, 'upos-sz-estgoss.bilivideo.com');
             }
-            if (segment.backup_url && segment.backup_url.length > 0) {
-                segment.backup_url.forEach((url, index) => {
-                    segment.backup_url[index] = replaceCDN(url, targetCDN);
-                });
+            if (item.backup_url && Array.isArray(item.backup_url)) {
+                item.backup_url = item.backup_url.map(url =>
+                    url.replace(/upos-hz-mirror.*?\.bilivideo\.com/, 'upos-sz-estgoss.bilivideo.com')
+                );
             }
         });
+        body = JSON.stringify(obj);
     }
-    
-    if (obj.data && obj.data.durl) {
-         obj.data.durl.forEach(segment => {
-            if (segment.url) {
-                segment.url = replaceCDN(segment.url, targetCDN);
-            }
-            if (segment.backup_url && segment.backup_url.length > 0) {
-                segment.backup_url.forEach((url, index) => {
-                    segment.backup_url[index] = replaceCDN(url, targetCDN);
-                });
-            }
-        });
-    }
-    
-    // 
-
-    body = JSON.stringify(obj);
-
 } catch (e) {
-    console.log("Bilibili CDN Mod: JSON parsing failed, might be Protobuf. " + e);
+    console.log('Bilibili CDN Script Error:', e);
 }
 
-$done({body});
-
-function replaceCDN(originalUrl, newCdnHost) {
-    if (!originalUrl || !newCdnHost) return originalUrl;
-    let url = new URL(originalUrl);
-    url.host = newCdnHost;
-    return url.toString();
-}
+$done({ body });
