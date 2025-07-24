@@ -4,68 +4,58 @@
  */
 console.log("🚀 正式替换脚本已执行，当前 URL：", $request.url);
 
+/
+
 let body = $response.body;
 if (!body) return $done({});
 
 try {
   let json = JSON.parse(body);
   const host = "upos-sz-estgoss.bilivideo.com";
-  let vCount = 0, aCount = 0, dCount = 0;
 
-  // DASH 视频
+  // 记录样例
+  let firstVideoOld = null, firstVideoNew = null;
+  let firstAudioOld = null, firstAudioNew = null;
+
+  // 替换 DASH 视频
   if (json.data?.dash?.video) {
-    json.data.dash.video.forEach(item => {
+    json.data.dash.video.forEach((item, idx) => {
       if (item.baseUrl) {
+        if (idx === 0) firstVideoOld = item.baseUrl;
         item.baseUrl = item.baseUrl.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        vCount++;
+        if (idx === 0) firstVideoNew = item.baseUrl;
       }
       if (item.backupUrl) {
-        item.backupUrl = item.backupUrl.map(u => {
-          vCount++;
-          return u.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        });
+        item.backupUrl = item.backupUrl.map(u =>
+          u.replace(/https?:\/\/[^\/]+/, `https://${host}`)
+        );
       }
     });
-    console.log(`🎬 DASH 视频链接已替换 ${vCount} 次`);
+    console.log("🎬 video[0] before:", firstVideoOld);
+    console.log("🎬 video[0]  after:", firstVideoNew);
   }
 
-  // DASH 音频
+  // 替换 DASH 音频
   if (json.data?.dash?.audio) {
-    json.data.dash.audio.forEach(item => {
+    json.data.dash.audio.forEach((item, idx) => {
       if (item.baseUrl) {
+        if (idx === 0) firstAudioOld = item.baseUrl;
         item.baseUrl = item.baseUrl.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        aCount++;
+        if (idx === 0) firstAudioNew = item.baseUrl;
       }
       if (item.backupUrl) {
-        item.backupUrl = item.backupUrl.map(u => {
-          aCount++;
-          return u.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        });
+        item.backupUrl = item.backupUrl.map(u =>
+          u.replace(/https?:\/\/[^\/]+/, `https://${host}`)
+        );
       }
     });
-    console.log(`🎵 DASH 音频链接已替换 ${aCount} 次`);
-  }
-
-  // 传统 durl（如果有的话）
-  if (json.data?.durl) {
-    json.data.durl.forEach(item => {
-      if (item.url) {
-        item.url = item.url.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        dCount++;
-      }
-      if (item.backup_url) {
-        item.backup_url = item.backup_url.map(u => {
-          dCount++;
-          return u.replace(/https?:\/\/[^\/]+/, `https://${host}`);
-        });
-      }
-    });
-    console.log(`📦 DURL 链接已替换 ${dCount} 次`);
+    console.log("🎵 audio[0] before:", firstAudioOld);
+    console.log("🎵 audio[0]  after:", firstAudioNew);
   }
 
   $done({ body: JSON.stringify(json) });
 
-} catch (err) {
-  console.log("❌ 脚本执行出错：", err);
+} catch (e) {
+  console.log("❌ 脚本出错：", e);
   $done({});
 }
