@@ -1,50 +1,54 @@
 /**
- * @fileoverview Bilibili CDN 代理脚本 (QX V3 - App 优先版)
+ * @fileoverview Bilibili CDN 代理脚本 (QX / Loon 通用版)
  *
- * QX 无法实现 V12 (Web V10 + App V3) 的分流.
- * 本脚本只实现 V3 (307 重定向) 逻辑.
- * 这将 100% 修复 App 端, 但 Web 端会因 CORS 失败.
+ * 1. 修正了无限循环：
+ * 使用 URL() 对象精确判断 hostname，
+ * 确保对 proxy-tf-all-ws.bilivideo.com 的请求被正确放行。
+ * 2. 依赖 [MITM] 中添加 `hostname = ...`。
  */
 
 function run() {
     // 检查 $request 是否存在
     if (typeof $request === 'undefined' || !$request.url) {
-        $done({}); 
-        return;
-    }
-
-    // (V4 逻辑) 放行CORS预检请求
-    if ($request.method === 'OPTIONS') {
-        $done({}); 
+        $done({}); // 环境异常，直接放行
         return;
     }
 
     const originalUrl = $request.url;
 
     try {
+        // 使用 URL() 构造函数来解析 URL
         const url = new URL(originalUrl);
 
-        // 避免无限循环
+        // --- 关键修正 ---
+        // 精确判断当前请求的域名 (hostname)
+        // 如果是代理服务器本身，则必须直接放行
         if (url.hostname === 'proxy-tf-all-ws.bilivideo.com') {
-            $done({}); 
+            $done({}); // 放行，不做任何修改
             return;
         }
 
-        // --- (V3) 核心逻辑: 307 重定向 ---
+        // --- 原始逻辑 ---
+        // 1. 对原始 URL 进行完整的 URL 编码
         const encodedUrl = encodeURIComponent(originalUrl);
+        
+        // 2. 构建你指定的目标 URL
         const newUrl = `https://proxy-tf-all-ws.bilivideo.com/?url=${encodedUrl}`;
         
+        // 3. 创建一个 307 (临时重定向) 响应
         const response = {
             status: 307,
             headers: {
                 'Location': newUrl
             }
         };
+        
+        // 4. 使用 $done() 返回这个重定向响应
         $done({ response: response });
 
     } catch (e) {
-        console.log(`Bili CDN V3-QX 脚本错误: ${e}`);
-        $done({}); // 发生错误，放行原请求
+        console.log(`Bili CDN 脚本错误: ${e}`);
+        $done({}); // 解析URL失败或发生其他错误，直接放行
     }
 }
 
