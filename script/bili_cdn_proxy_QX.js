@@ -1,10 +1,10 @@
 /**
- * @fileoverview Bilibili CDN 代理脚本 (QX / Loon 通用版)
+ * @fileoverview Bilibili CDN 代理脚本 (V3 - 最终修正版)
  *
  * 1. 修正了无限循环：
  * 使用 URL() 对象精确判断 hostname，
  * 确保对 proxy-tf-all-ws.bilivideo.com 的请求被正确放行。
- * 2. 依赖 [MITM] 中添加 `hostname = ...`。
+ * 2. 依赖 [MITM] 中添加 `hostname = *.bilivideo.com`。
  */
 
 function run() {
