@@ -6,9 +6,12 @@ if (body && body.includes("#EXT-X-STREAM-INF")) {
     let bestStreamUrl = "";
     let maxBandwidth = 0;
     
-    // 1. 提取 m3u8 文件的基础头部信息
+    // 1. 提取 m3u8 文件的基础头部信息（关键修复：增加保留 #EXT-X-MEDIA 音频轨标签）
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith("#EXTM3U") || lines[i].startsWith("#EXT-X-VERSION") || lines[i].startsWith("#EXT-X-INDEPENDENT-SEGMENTS")) {
+        if (lines[i].startsWith("#EXTM3U") || 
+            lines[i].startsWith("#EXT-X-VERSION") || 
+            lines[i].startsWith("#EXT-X-INDEPENDENT-SEGMENTS") || 
+            lines[i].startsWith("#EXT-X-MEDIA")) { // 这里把声音留下了！
             newBody += lines[i] + "\n";
         }
     }
@@ -19,11 +22,9 @@ if (body && body.includes("#EXT-X-STREAM-INF")) {
             let info = lines[i];
             let url = lines[i+1];
             
-            // 使用正则匹配 BANDWIDTH 的数值
             let bandwidthMatch = info.match(/BANDWIDTH=(\d+)/);
             if (bandwidthMatch && bandwidthMatch.length > 1) {
                 let bandwidth = parseInt(bandwidthMatch[1]);
-                // 如果当前带宽大于记录的最大带宽，则替换为当前流
                 if (bandwidth > maxBandwidth) {
                     maxBandwidth = bandwidth;
                     bestStreamInfo = info;
@@ -33,13 +34,13 @@ if (body && body.includes("#EXT-X-STREAM-INF")) {
         }
     }
     
-    // 3. 将最高画质的流拼接到头部信息后，返回给客户端
+    // 3. 将最高画质的流拼接到带有音频信息的头部后，返回给客户端
     if (bestStreamInfo) {
         newBody += bestStreamInfo + "\n" + bestStreamUrl + "\n";
         $done({ body: newBody });
     } else {
-        $done({}); // 如果没找到带宽信息，原样放行
+        $done({}); 
     }
 } else {
-    $done({}); // 如果不是包含视频流的 m3u8 文件，原样放行
+    $done({}); 
 }
