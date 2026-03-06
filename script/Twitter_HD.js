@@ -1,46 +1,47 @@
 let body = $response.body;
-if (body && body.includes("#EXT-X-STREAM-INF")) {
+
+// 1. 极速拦截：使用 indexOf 替代 includes (性能更好)，如果不是目标文件瞬间放行，不产生任何多余变量
+if (!body || body.indexOf("#EXT-X-STREAM-INF") === -1) {
+    $done({});
+} else {
     let lines = body.split('\n');
-    let newBody = "";
+    let headerLines = []; // 优化：使用数组暂存，彻底消灭字符串 += 拼接带来的内存碎片
     let bestStreamInfo = "";
     let bestStreamUrl = "";
     let maxBandwidth = 0;
-    
-    // 1. 提取 m3u8 文件的基础头部信息（关键修复：增加保留 #EXT-X-MEDIA 音频轨标签）
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith("#EXTM3U") || 
-            lines[i].startsWith("#EXT-X-VERSION") || 
-            lines[i].startsWith("#EXT-X-INDEPENDENT-SEGMENTS") || 
-            lines[i].startsWith("#EXT-X-MEDIA")) { // 这里把声音留下了！
-            newBody += lines[i] + "\n";
-        }
-    }
 
-    // 2. 遍历所有视频流，读取 BANDWIDTH 数值，找出最大值
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith("#EXT-X-STREAM-INF")) {
-            let info = lines[i];
-            let url = lines[i+1];
-            
-            let bandwidthMatch = info.match(/BANDWIDTH=(\d+)/);
-            if (bandwidthMatch && bandwidthMatch.length > 1) {
-                let bandwidth = parseInt(bandwidthMatch[1]);
-                if (bandwidth > maxBandwidth) {
-                    maxBandwidth = bandwidth;
-                    bestStreamInfo = info;
-                    bestStreamUrl = url;
+    // 2. 单次遍历：将两次循环合并为一次，并缓存数组长度提高读取效率
+    for (let i = 0, len = lines.length; i < len; i++) {
+        let line = lines[i];
+        
+        // 收集音频和头部信息直接推入数组
+        if (line.startsWith("#EXTM3U") || 
+            line.startsWith("#EXT-X-VERSION") || 
+            line.startsWith("#EXT-X-INDEPENDENT-SEGMENTS") || 
+            line.startsWith("#EXT-X-MEDIA")) {
+            headerLines.push(line);
+        } 
+        // 在同一次循环中比对画质
+        else if (line.startsWith("#EXT-X-STREAM-INF")) {
+            let match = line.match(/BANDWIDTH=(\d+)/);
+            if (match) {
+                // 指定 10 进制，防止 parseInt 隐式转换消耗性能
+                let bw = parseInt(match[1], 10);
+                if (bw > maxBandwidth) {
+                    maxBandwidth = bw;
+                    bestStreamInfo = line;
+                    bestStreamUrl = (i + 1 < len) ? lines[i+1] : ""; // 防越界保护
                 }
             }
         }
     }
-    
-    // 3. 将最高画质的流拼接到带有音频信息的头部后，返回给客户端
+
+    // 3. 终极拼装：使用 join 一次性生成最终文本，对内存极其友好
     if (bestStreamInfo) {
-        newBody += bestStreamInfo + "\n" + bestStreamUrl + "\n";
-        $done({ body: newBody });
+        headerLines.push(bestStreamInfo);
+        headerLines.push(bestStreamUrl);
+        $done({ body: headerLines.join('\n') + '\n' });
     } else {
-        $done({}); 
+        $done({});
     }
-} else {
-    $done({}); 
 }
