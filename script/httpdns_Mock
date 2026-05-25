@@ -1,0 +1,34 @@
+/**
+ * @fileoverview Bilibili HTTPDNS 优雅阻断脚本 (Mock)
+ * * 核心逻辑：
+ * 拦截 B站的 HTTPDNS 请求，直接返回 200 OK 和一个包含空 IP 列表的合法 JSON。
+ * 这能欺骗 App 认为 HTTPDNS 成功响应，从而停止疯狂重试，
+ * 并乖乖降级使用 Local DNS (域名) 发起视频请求。
+ */
+
+const fakeBody = JSON.stringify({
+    code: 0,
+    client_ip: "127.0.0.1",
+    host: "mcdn.bilivideo.cn", // 象征性返回，SDK不会在意
+    ips: []                    // 核心：空节点列表
+});
+
+const isQX = typeof $environment !== 'undefined' && $environment['quantumult-x'];
+
+if (isQX) {
+    // Quantumult X 返回响应体语法
+    $done({
+        status: "HTTP/1.1 200 OK",
+        headers: { "Content-Type": "application/json" },
+        body: fakeBody
+    });
+} else {
+    // Loon / Stash 返回响应体语法
+    $done({
+        response: {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+            body: fakeBody
+        }
+    });
+}
