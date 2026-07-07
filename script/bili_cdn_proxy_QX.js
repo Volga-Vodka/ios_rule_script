@@ -1,5 +1,6 @@
 /**
- * @fileoverview Bilibili CDN 代理脚本 (Quantumult X 终极版)
+ * @fileoverview Bilibili CDN 代理脚本 (Quantumult X 终极防嵌套版)
+ * 修正了 QuanX 在内部重写时绝对路径与 Host 拼接导致的 https://...https://... 错误。
  */
 
 function run() {
@@ -10,13 +11,13 @@ function run() {
 
     const originalUrl = $request.url;
 
-    // 1. 【防嵌套防御】：遇到代理域名本身，直接放行
+    // 1. 【防代理循环嵌套】
     if (originalUrl.includes('proxy-tf-all-ws.bilivideo.com')) {
         $done({}); 
         return;
     }
 
-    // 2. 【防降级防御】：遇到 HTTPDNS / gRPC 探测，直接放行（交给分流规则或 Mock 脚本处理）
+    // 2. 【防降级探测】放行 HTTPDNS 与 IP 直连
     if (originalUrl.includes('httpdns.bilivideo.com') || 
         originalUrl.includes('/resolve?') || 
         originalUrl.includes('203.119.206.8')) {
@@ -34,11 +35,15 @@ function run() {
 
     try {
         const encodedUrl = encodeURIComponent(originalUrl);
-        const newUrl = `https://proxy-tf-all-ws.bilivideo.com/?url=${encodedUrl}`;
+        
+        // 区分“相对路径”和“绝对路径”
+        const newPath = `/?url=${encodedUrl}`; // 专供 Web 端内部重写使用
+        const newFullUrl = `https://proxy-tf-all-ws.bilivideo.com${newPath}`; // 专供 App 端 307 使用
+        
         const ua = originalHeaders['user-agent'] || originalHeaders['User-Agent'] || "";
 
         if (ua.includes('Mozilla')) {
-            // --- 网页端：内部重写 URL + 修正 authority ---
+            // --- 网页端：内部重写 (修正拼接 Bug) ---
             let newHeaders = {};
             for (let key in originalHeaders) {
                 newHeaders[key.toLowerCase()] = originalHeaders[key];
@@ -47,18 +52,18 @@ function run() {
             newHeaders['host'] = newAuthority;
             newHeaders['authority'] = newAuthority;
             
+            // 关键修正：这里 path 只能传入相对路径
             $done({ 
-                path: newUrl,
-                url: newUrl,
+                path: newPath,
                 headers: newHeaders 
             });
 
         } else {
-            // --- App 端：直接返回 307 外部重定向响应 ---
+            // --- App 端：307 外部重定向 ---
             $done({
                 status: "HTTP/1.1 307 Temporary Redirect",
                 headers: {
-                    "Location": newUrl
+                    "Location": newFullUrl
                 }
             });
         }
