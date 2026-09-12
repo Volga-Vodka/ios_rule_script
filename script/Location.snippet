@@ -1,0 +1,11 @@
+#!name = 定位修改
+#!desc = 定位修改
+
+#[rewrite_local]
+# wloc
+https?:\/\/(?:gs-loc(?:-cn)?\.apple\.com|gsp-ssl\.ls\.apple\.com|bluedot\.is\.autonavi\.com(?:\.gds\.alibabadns\.com)?)\/clls\/wloc url script-response-body https://raw.githubusercontent.com/Volga-Vodka/ios_rule_script/refs/heads/master/script/wloc.js
+# wloc_settings
+https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save url script-echo-response https://raw.githubusercontent.com/Volga-Vodka/ios_rule_script/refs/heads/master/script/wloc-settings.js
+
+#[mitm]
+hostname = gs-loc.apple.com, gs-loc-cn.apple.com, gsp-ssl.ls.apple.com, bluedot.is.autonavi.com, bluedot.is.autonavi.com.gds.alibabadns.com
