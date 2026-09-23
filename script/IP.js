@@ -8,10 +8,7 @@ var title = obj['country'];
 var subtitle = obj['city'] + ' ' + obj['isp'];
 var ip = obj['ip'];
 var description =
-    "国家:" + obj['country'] +
-    '\n' + "城市:" + obj['city'] +
-    '\n' + "运营商:" + obj['isp'] +
-    '\n' + "数据中心:" + obj['organization'];
+    "国家:" + obj['country'] + '\n' + "城市:" + obj['city'] + '\n' + "运营商:" + obj['isp'] + '\n' + "数据中心:" + obj['organization'];
 // Quantumult X 节点信息显示
 $done({
     title: title,
