@@ -1,0 +1,52 @@
+#!name = Biliverse: Enhanced
+#!desc = 全面自定义哔哩哔哩 App 主界面，修改首页和底栏元素的显示顺序和触发功能
+#!openUrl = https://biliverse.github.io/guide/enhanced
+#!author = Biliverse
+#!homepage = https://github.com/Biliverse/Enhanced
+#!icon = https://raw.githubusercontent.com/Biliverse/Enhanced/v0.6.0/icon.png
+#!category = Biliverse
+#!date = 2026-09-22 01:53:56
+#!version = 0.6.0
+
+[rewrite_local]
+
+# Biliverse Settings
+^https:\/\/app\.bilibili\.com\/settings\/(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/index.html
+^https:\/\/app\.bilibili\.com\/settings\/theme\.css(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/theme.css
+^https:\/\/app\.bilibili\.com\/settings\/index\.mjs(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/index.mjs
+^https:\/\/app\.bilibili\.com\/settings\/assets\/Biliverse_subject\.png(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/assets/Biliverse_subject.png
+^https:\/\/app\.bilibili\.com\/settings\/assets\/Enhanced_subject\.png(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/assets/Enhanced_subject.png
+^https:\/\/app\.bilibili\.com\/settings\/assets\/Global_subject\.png(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/assets/Global_subject.png
+^https:\/\/app\.bilibili\.com\/settings\/assets\/Redirect_subject\.png(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/assets/Redirect_subject.png
+^https:\/\/app\.bilibili\.com\/settings\/assets\/ADBlock_subject\.png(?:\?[^#]*)?$ url 307 https://biliverse.github.io/settings/assets/ADBlock_subject.png
+
+^https:\/\/(?:biliverse\.github\.io|app\.bilibili\.com)\/settings\/[a-zA-Z0-9_-]+\/?(?:\?[^#]*)?$ url 307 https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/index.html
+^https:\/\/(?:biliverse\.github\.io|app\.bilibili\.com)\/settings\/assets\/index\.mjs(?:\?[^#]*)?$ url 307 https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/index.mjs
+^https:\/\/(?:biliverse\.github\.io|app\.bilibili\.com)\/settings\/assets\/navigation\.mjs(?:\?[^#]*)?$ url 307 https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/navigation.mjs
+
+# Biliverse 本地设置
+^https:\/\/(?:biliverse\.github\.io|app\.bilibili\.com)\/api\/(?:get|set|delete)(?:\?.*)?$ url script-echo-response https://github.com/NSNanoCat/PreferencePanes/releases/latest/download/api.js
+
+^https:\/\/(?:biliverse\.github\.io|app\.bilibili\.com)\/api\/Enhanced(?:\?.*)?$ url 307 https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/Biliverse.Enhanced.PreferencePanes.json
+
+
+# 📺 Biliverse.Enhanced.x.resource.show.tab.v2
+^https?:\/\/app\.bili(bili\.com|api\.net)\/x\/resource\/show\/tab\/v2\? url script-response-body https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/response.bundle.js
+
+# 📺 Biliverse.Enhanced.show.v1.Mixture.RegionShortcut.request.grpc
+^https?:\/\/(grpc|app)\.bili(bili\.com|api\.net)\/bilibili\.app\.show\.v1\.Mixture\/RegionShortcut$ url script-request-body https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/request.bundle.js
+
+# 📺 Biliverse.Enhanced.show.v1.Mixture.RegionList.response.grpc
+^https?:\/\/(grpc|app)\.bili(bili\.com|api\.net)\/bilibili\.app\.show\.v1\.Mixture\/RegionList$ url script-response-body https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/response.bundle.js
+
+# 📺 Biliverse.Enhanced.x.v2.account.mine
+^https?:\/\/app\.bili(bili\.com|api\.net)\/x\/v2\/account\/mine(\/ipad)?\? url script-response-body https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/response.bundle.js
+
+# 📺 Biliverse.Enhanced.x.v2.region.index
+^https?:\/\/app\.bili(bili\.com|api\.net)\/x\/v2\/region\/index\? url script-response-body https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/response.bundle.js
+
+# 📺 Biliverse.Enhanced.x.v2.channel.region.list
+^https?:\/\/app\.bili(bili\.com|api\.net)\/x\/v2\/channel\/region\/list\? url script-response-body https://github.com/Biliverse/Enhanced/releases/download/v0.6.0/response.bundle.js
+
+[mitm]
+hostname = biliverse.github.io, app.bilibili.com, app.biliapi.net, grpc.biliapi.net
