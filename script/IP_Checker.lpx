@@ -1,0 +1,16 @@
+#!name=定位修改
+#!desc=修改设备的GPS定位
+#!openUrl=
+#!author=
+#!homepage=
+#!icon=https://raw.githubusercontent.com/MaYIHEI/paperclip/refs/heads/main/loon/ipquality-web-test/icon.png
+#!loon_version=3.5.1(980)
+#!tag=工具
+#!date=2026-10-23 23:00:00
+
+[Script]
+http-response ^https?:\/\/(?:gs-loc(?:-cn)?\.apple\.com|gsp-ssl\.ls\.apple\.com|bluedot\.is\.autonavi\.com(?:\.gds\.alibabadns\.com)?)\/clls\/wloc script-path = https://raw.githubusercontent.com/Volga-Vodka/ios_rule_script/refs/heads/master/script/wloc.js, requires-body = true, tag = WLOC 定位修改
+http-request ^https?:\/\/gs-loc(?:-cn)?\.apple\.com\/wloc-settings\/save script-path = https://raw.githubusercontent.com/Volga-Vodka/ios_rule_script/refs/heads/master/script/wloc-settings.js, tag = WLOC 定位设置修改
+
+[MITM]
+hostname = gs-loc.apple.com, gs-loc-cn.apple.com, gsp-ssl.ls.apple.com, bluedot.is.autonavi.com, bluedot.is.autonavi.com.gds.alibabadns.com
